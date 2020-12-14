@@ -1,24 +1,24 @@
-题目链接：https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/
+### 题目链接
 
-题目描述：
+[剑指Offer - 03 - 数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
+
+### 题目描述
 
 ![题目描述](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20200522174447.png)
 
 
 
-解题思路：
+### 解题思路
 
 1. 这种题其实可以使用`HashMap`进行解决，不过会浪费空间。
-2. 也可以先排序之后再查找（先排序排序的目的就是,所有相同的数字会挨到一起,这样,就只需要和自己的下一位比较就能获取到重复值）。
+2. 也可以先排序之后再查找（先排序排序的目的就是，所有相同的数字会挨到一起，这样，就只需要和自己的下一位比较就能获取到重复值）。
 3. 但是能够原地就最好了，原地的思路就是，巧用数组性质。
-
-具体代码：
 
 **1.排序+遍历**
 
 ```go
 func findRepeatNumber(nums []int) int {
-	// 使用内置函数排序
+    // 使用内置函数排序
     sort.Ints(nums)
     // 取首元素
     LASTNum := num[0]
@@ -30,7 +30,7 @@ func findRepeatNumber(nums []int) int {
             lstNum = num //把值赋值给laskNum让它和下一位相比较
         }
     }
-	return lastNum
+    return lastNum
 }
 ```
 
