@@ -4,7 +4,7 @@
 
 ### 题目描述
 
-![image-20201214193542022](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201214193542.png)
+![image-20201214193542022](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201214195140.png)
 
 ### 解题思路
 
