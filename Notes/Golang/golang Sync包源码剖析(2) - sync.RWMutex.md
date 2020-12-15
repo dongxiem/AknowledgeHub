@@ -1,7 +1,5 @@
 # 1.sync.RWMutex 介绍
 
-
-
 [Sync.RWMutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/rwmutex.go#L5) 官方给出的定义是读/写互斥锁，锁可以由任意数量的读者或单个写者持有。 `RWMutex`的零值是未锁定的互斥锁。
 
 > A RWMutex is a reader/writer mutual exclusion lock. The lock can be held by an arbitrary number of readers or a single writer. The zero value for a RWMutex is an unlocked mutex.
@@ -21,23 +19,21 @@ func (rw *RWMutex) Unlock       // 提供写锁解锁操作
 
 **（1）：写操作如何防止写操作？**
 
-- **<u>写操作依赖互斥锁阻止其他的写操作</u>**：读写锁包含一个互斥锁(Mutex)，写锁定必须要先获取该互斥锁，如果互斥锁已被协程A获取（或者协程A在阻塞等待读结束），意味着协程A获取了互斥锁，那么协程B只能阻塞等待该互斥锁。
+- **写操作依赖互斥锁阻止其他的写操作**：读写锁包含一个互斥锁`(Mutex)`，写锁定必须要先获取该互斥锁，如果互斥锁已被协程A获取（或者协程A在阻塞等待读结束），意味着协程 A 获取了互斥锁，那么协程B只能阻塞等待该互斥锁。
 
 **（2）：写操作是如何阻止读操作的？**
 
-- 首先了解一下最多可支持的并发读者：`RWMutex.readerCount`是个整型值，用于表示读者数量，不考虑写操作的情况下，每次读锁定将该值+1，每次解除读锁定将该值-1，所以`readerCount`取值为`[0, N]`，N为读者个数，实际上**<u>最大可支持`2^30`个并发读者</u>**。
-- **<u>写操作将`readerCount`变成负值来阻止读操作的</u>**：当写锁定进行时，会先将`readerCount`减去`2^30`，从而`readerCount`变成了负值，此时再有读锁定到来时检测到`readerCount`为负值，便知道有写操作在进行，只好阻塞等待。而真实的读操作个数并不会丢失，只需要将`readerCount`加上`2^30`即可获得。
+- 首先了解一下最多可支持的并发读者：`RWMutex.readerCount`是个整型值，用于表示读者数量，不考虑写操作的情况下，每次读锁定将该值+1，每次解除读锁定将该值 -1，所以`readerCount`取值为`[0, N]`，N为读者个数，实际上**最大可支持`2^30`个并发读者**。
+- **写操作将`readerCount`变成负值来阻止读操作的**：当写锁定进行时，会先将`readerCount`减去`2^30`，从而`readerCount`变成了负值，此时再有读锁定到来时检测到`readerCount`为负值，便知道有写操作在进行，只好阻塞等待。而真实的读操作个数并不会丢失，只需要将`readerCount`加上`2^30`即可获得。
 
 **（3）：读操作是如何阻止写操作的？**
 
-- **<u>读操作通过`readerCount`来将来阻止写操作的</u>**：读锁定会先将`RWMutext.readerCount`加1，此时写操作到来时发现读者数量不为0，会阻塞等待所有读操作结束。
+- **读操作通过`readerCount`来将来阻止写操作的**：读锁定会先将`RWMutext.readerCount`加1，此时写操作到来时发现读者数量不为0，会阻塞等待所有读操作结束。
 
 **（4）：为什么写锁定不会被饿死？**
 
 - 首先解释一下为什么可能有饿死的情况发生：写操作要等待读操作结束后才可以获得锁，写操作等待期间可能还有新的读操作持续到来，如果写操作等待所有读操作结束，很可能被饿死。
-- **<u>可以通过`RWMutex.readerWait`解决这个问题</u>**写操作到来时，会把`RWMutex.readerCount`值拷贝`到RWMutex.readerWait`中，用于标记排在写操作前面的读者个数。前面的读操作结束后，除了会递减`RWMutex.readerCount`，还会递减`RWMutex.readerWait`值，当`RWMutex.readerWait`值变为0时唤醒写操作。**<u>所以，写操作就相当于把一段连续的读操作划分成两部分，前面的读操作结束后唤醒写操作，写操作结束后唤醒后面的读操作</u>**。
-
-
+- **可以通过`RWMutex.readerWait`解决这个问题**写操作到来时，会把`RWMutex.readerCount`值拷贝`到RWMutex.readerWait`中，用于标记排在写操作前面的读者个数。前面的读操作结束后，除了会递减`RWMutex.readerCount`，还会递减`RWMutex.readerWait`值，当`RWMutex.readerWait`值变为0时唤醒写操作。**所以，写操作就相当于把一段连续的读操作划分成两部分，前面的读操作结束后唤醒写操作，写操作结束后唤醒后面的读操作**。
 
 注：以下源码解析基于 `go 1.15`
 
@@ -64,12 +60,12 @@ const rwmutexMaxReaders = 1 << 30
 
 
 
-关于信号量（semaphore）的问题，这里做一个补充：
+关于信号量（`semaphore`）的问题，这里做一个补充：
 
 这是一个由 `Edsger Dijkstra` 提出的数据结构，解决很多关于同步的问题时，它提供了两种操作的整数：
 
-- 获取（acquire，又称 wait、decrement 或者 P）
-- 释放（release，又称 signal、increment 或者 V）
+- 获取（`acquire`，又称 `wait`、`decrement` 或者 P）
+- 释放（`release`，又称 `signal`、increment 或者 V）
 
 获取操作把信号量减一，如果减一的结果是非负数，那么线程可以继续执行。如果结果是负数，那么线程将会被阻塞，除非有其它线程把信号量增加回非负数，该线程才有可能恢复运行）。
 
@@ -127,8 +123,6 @@ func (rw *RWMutex) Lock() {
 
 ## 写锁释放 UnLock()
 
-
-
 写锁的释放会调用 `sync.RWMutex.Unlock` 方法：
 
 ```go
@@ -182,8 +176,8 @@ func (rw *RWMutex) RLock() {
         race.Disable()
     }
     //这里分两种情况:
-	// 1.此时无写锁 (readerCount + 1) > 0,那么可以上读锁, 并且readerCount原子加1(读锁可重入[只要匹配了释放次数就行])
-	// 2.此时有写锁 (readerCount + 1) < 0,所以通过readerSem读信号量, 使读操作睡眠等待
+	// 1.此时无写锁 (readerCount + 1) > 0,那么可以上读锁, 并且readerCount原子加1(读锁可重入[只要匹配了释放次数就行])。
+	// 2.此时有写锁 (readerCount + 1) < 0,所以通过readerSem读信号量, 使读操作睡眠等待。
     if atomic.AddInt32(&rw.readerCount, 1) < 0 {
         // 当前有个写锁, 读操作需要阻塞等待写锁释放；
         // 其实做的事情是将 goroutine 排到G队列的后面,挂起 goroutine
@@ -203,8 +197,6 @@ func (rw *RWMutex) RLock() {
 
 1. 此时无写锁 `(readerCount + 1) > 0`（注意，在写锁是加锁那里，我们对readerCount 进行了`readerCount-rwmutexMaxReaders`处理），那么可以上读锁, 并且`readerCount`原子加1（读锁可重入[只要匹配了释放次数就行]）；
 2. 此时有写锁 `(readerCount + 1) < 0,`所以通过`readerSem`读信号量, 使读操作睡眠等待；
-
-
 
 ## 读锁释放 RUnlock()
 
