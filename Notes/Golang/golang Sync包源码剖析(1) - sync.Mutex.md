@@ -2,7 +2,7 @@
 
 `Golang` 语言有着天生适合高并发的特性，作为原生支持用户态进程（`Goroutine`）的语言，当涉及到并发编程，多线程编程时候，则离不开锁相关的概念了，于是编写 `golang` 源码的大叔们就给了 [src/sync](https://sourcegraph.com/github.com/golang/go@master/-/tree/src/sync) 这么个包，通过浏览源码可以知道 [src/sync](https://sourcegraph.com/github.com/golang/go@master/-/tree/src/sync) 包中提供了用于同步的一些基本原语，可以说这是一个很重要的的包了，如果掌握这个包，在编写代码的工程中肯定能够大有帮助，这个包大体上有：[sync.Mutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L11)、[sync.RWMutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/rwmutex.go#L7)、[sync.WaitGroup](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/waitgroup.go#L7)、[sync.Map](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/map.go#L7)、[sync.Pool](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/pool.go#L44)、[sync.Once](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/once.go#L7)、[sync.Cond](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/cond.go#L5)，也可以看一下官方给的sync包的一些方法解释：[`sync`](https://golang.org/pkg/sync/) ，同时为了节省一下 Clone 源码时间，或者只想简单回顾一下源码，这里给了快捷的入口：[src/sync](https://sourcegraph.com/github.com/golang/go@master/-/tree/src/sync)。
 
-在并发编程中，同步原语或者锁，他们的**<u>主要作用是保证多个线程或者多个`goroutine`在访问同一片内存时不会出现混乱的问题</u>**，这个是一个非常重要的内容，很多人在编写代码的时候常常没有注重对这些并发访问的内容进行关注，导致出现事故也不清楚是什么原因，而[`sync`](https://golang.org/pkg/sync/) 包中所有的结构都适用于`goroutine`并发执行的情况，需要好好掌握。
+在并发编程中，同步原语或者锁，他们的**主要作用是保证多个线程或者多个**`goroutine`在访问同一片内存时不会出现混乱的问题，这个是一个非常重要的内容，很多人在编写代码的时候常常没有注重对这些并发访问的内容进行关注，导致出现事故也不清楚是什么原因，而[`sync`](https://golang.org/pkg/sync/) 包中所有的结构都适用于`goroutine`并发执行的情况，需要好好掌握。
 
 注：以下`golang`源码版本为：1.15
 
@@ -70,7 +70,7 @@ func (m *Mutex) Unlock() {
 
 ## sync.Mutex 结构体及常量定义
 
-[sync.Mutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L13) 可能是`sync`包中使用最广泛的原语，顾名思义就是相互排斥的锁，**<u>它确保同一时刻只有一个协程能访问某对象，也即它允许在共享资源上互斥访问（不能同时访问）</u>**，初始状态为`unlock`。
+[sync.Mutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L13) 可能是`sync`包中使用最广泛的原语，顾名思义就是相互排斥的锁，**它确保同一时刻只有一个协程能访问某对象，也即它允许在共享资源上互斥访问（不能同时访问）**，初始状态为`unlock`。
 
 `Mutex` 的结构体定义如下：
 
@@ -114,7 +114,7 @@ const (
   存储等待 goroutine 数量
 ```
 
-还有最后一个常量，这个常量尤其重要，因为它引出了 引出了 `sync.Mutex` 的一个特性：保证公平。**怎样来保证公平呢？**通过<u>引入正常状态和饥饿状态模式</u>进行。
+还有最后一个常量，这个常量尤其重要，因为它引出了 引出了 `sync.Mutex` 的一个特性：保证公平。怎样来保证公平呢？通过引入正常状态和饥饿状态模式进行。
 
 - **starvationThresholdNs**：值为 1000000 纳秒，即 1ms，表示将 `mutex` 切换到饥饿模式的等待时间阈值。这个常量在源码中有大篇幅的注释，理解这段注释对理解程序逻辑至关重要。
 
@@ -124,11 +124,11 @@ const (
 
 将上面的注解原文，进行一个简单的翻译处理之后的认识如下。（从源码作者口中讲出的东西，更有说服力！）
 
-饥饿模式是在 Go 语言 [1.9](https://github.com/golang/go/commit/0556e26273f704db73df9e7c4c3d2e8434dec7be) 版本引入的优化，引入的**<u>目的是保证互斥锁的公平性（Fairness）</u>**。互斥锁有两种状态：正常状态和饥饿状态。
+饥饿模式是在 Go 语言 [1.9](https://github.com/golang/go/commit/0556e26273f704db73df9e7c4c3d2e8434dec7be) 版本引入的优化，**引入的目的是保证互斥锁的公平性（Fairness）**。互斥锁有两种状态：正常状态和饥饿状态。
 
-**<u>在正常状态下，所有等待锁的`goroutine`按照FIFO顺序等待</u>**。唤醒的`goroutine`不会直接拥有锁，而是会和新请求锁的`goroutine`竞争锁的拥有。新请求锁的`goroutine`具有优势：它正在 CPU 上执行，而且可能有好几个，所以刚刚唤醒的`goroutine`有很大可能在锁竞争中失败。在这种情况下，这个被唤醒的`goroutine`会加入到等待队列的前面。<u>如果一个等待的`goroutine`超过 1ms 没有获取锁，那么它将会把锁转变为饥饿模式</u>。
+**在正常状态下，所有等待锁的`goroutine`按照FIFO顺序等待**。唤醒的`goroutine`不会直接拥有锁，而是会和新请求锁的`goroutine`竞争锁的拥有。新请求锁的`goroutine`具有优势：它正在 CPU 上执行，而且可能有好几个，所以刚刚唤醒的`goroutine`有很大可能在锁竞争中失败。在这种情况下，这个被唤醒的`goroutine`会加入到等待队列的前面。<u>如果一个等待的`goroutine`超过 1ms 没有获取锁，那么它将会把锁转变为饥饿模式</u>。
 
-**<u>在饥饿模式下，锁的所有权将从`unlock`的`gorutine`直接交给交给等待队列中的第一个</u>**。<u>新来的`goroutine`将不会尝试去获得锁，即使锁看起来是`unlock`状态, 也不会去尝试自旋操作</u>（等也白等，在饥饿模式下是不会给你的），而是乖乖地待在等待队列的尾部。
+**在饥饿模式下，锁的所有权将从`unlock`的`gorutine`直接交给交给等待队列中的第一个**。<u>新来的`goroutine`将不会尝试去获得锁，即使锁看起来是`unlock`状态, 也不会去尝试自旋操作</u>（等也白等，在饥饿模式下是不会给你的），而是乖乖地待在等待队列的尾部。
 
 如果一个等待的`goroutine`获取了锁，并且满足一以下其中的任何一个条件：
 
@@ -165,7 +165,7 @@ func (m *Mutex) Lock() {
 func CompareAndSwapInt32(addr *int32, old, new int32) (swapped bool)
 ```
 
-这里对 `atomic.CompareAndSwapInt32()` 方法进行一个解释，`atomic`包是由golang提供的low-level的原子操作封装，主要用来解决进程同步问题，但官方并不建议直接使用。`CompareAndSwapInt32()`就是int32型数字的`compare-and-swap`实现。**<u>`cas(&addr, old, new)`的意思是`if *addr==old, *addr=new`。大部分操作系统支持CAS，x86指令集上的CAS汇编指令是`CMPXCHG`。</u>**
+这里对 `atomic.CompareAndSwapInt32()` 方法进行一个解释，`atomic`包是由golang提供的low-level的原子操作封装，主要用来解决进程同步问题，但官方并不建议直接使用。`CompareAndSwapInt32()`就是int32型数字的`compare-and-swap`实现。**`cas(&addr, old, new)`的意思是`if *addr==old, *addr=new`。大部分操作系统支持CAS，x86指令集上的CAS汇编指令是`CMPXCHG`。**
 
 当然，这里还是可以深入理解一下 `CAS` 的底层实现，源码可见：[src/runtime/internal/atomic/asm_amd64.s](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/runtime/internal/atomic/asm_amd64.s)，对汇编语言的了解较少，读起来较为吃力，具体的代码片段及注释可见下面：
 
@@ -203,7 +203,7 @@ TEXT runtime∕internal∕atomic·Cas(SB),NOSPLIT,$0-17
 	RET
 ```
 
-从上面的汇编源码可以知道，大概的流程为：**<u>看看这把锁是不是空闲状态，如果是的话，直接原子性地修改一下 `state` 为已被获取就行了</u>**。大概了解一下，知道该方法是**<u>原子性</u>**的即可。
+从上面的汇编源码可以知道，大概的流程为：**<u>看看这把锁是不是空闲状态，如果是的话，直接原子性地修改一下 `state` 为已被获取就行了</u>**。大概了解一下，知道该方法是**原子性**的即可。
 
 继续回到 [sync.Mutex.Lock](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L72:22) 当中，接下来判断如果 [sync.Mutex](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L13) 的状态不为 0 的时候， [sync.Mutex.Lock](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/sync/mutex.go#L72:22) 就会进入 `m.lockSlow()` 方法，那么`m.lockSlow()` 方法做了些什么事情呢？注意，我将分段解析这个方法，具体合并的注释理解在最后附上。
 
@@ -220,7 +220,7 @@ func (m *Mutex) lockSlow() {
 
 接下来分成几个部分介绍获取锁的过程：
 
-1. <u>**判断 `Goroutine` 的状态，看是否能够进行自旋等锁；**</u>
+1. **判断 `Goroutine` 的状态，看是否能够进行自旋等锁；**
 
 ```go
     for {
@@ -244,9 +244,9 @@ func (m *Mutex) lockSlow() {
         }
 ```
 
-总的来说需要注意**<u>如果是饥饿模式则不进行自旋，因为锁的所有权会直接交给队列头部的 goroutine，所以在这个饥饿状态下，无论如何都无法获得mutex</u>**。 
+总的来说需要注意**如果是饥饿模式则不进行自旋，因为锁的所有权会直接交给队列头部的 goroutine，所以在这个饥饿状态下，无论如何都无法获得mutex**。 
 
-需要了解的是自旋是一种多线程同步机制，**<u>当前的进程在进入自旋的过程中会一直保持 CPU 的占用，持续检查某个条件是否为真</u>**。在多核的 CPU 上，自旋可以避免 Goroutine 的切换，使用恰当会对性能带来很大的增益，但是使用的不恰当就会拖慢整个程序，所以 Goroutine 进入自旋的条件非常苛刻：
+需要了解的是自旋是一种多线程同步机制，**当前的进程在进入自旋的过程中会一直保持 CPU 的占用，持续检查某个条件是否为真**。在多核的 CPU 上，自旋可以避免 Goroutine 的切换，使用恰当会对性能带来很大的增益，但是使用的不恰当就会拖慢整个程序，所以 Goroutine 进入自旋的条件非常苛刻：
 
 1. 互斥锁只有在普通模式才能进入自旋；
 2. 需要等待 [runtime_canSpin()](https://sourcegraph.com/github.com/golang/go@8ab020adb27089fa207d015f2f69600ef3d1d307/-/blob/src/sync/runtime.go#L52:1) 返回 True；
@@ -272,9 +272,9 @@ func sync_runtime_canSpin(i int) bool {
 2. 然后<u>应该运行在多内核的机器上，且`GOMAXPROCS`的数目应该要大于1</u>；（如果`GOMAXPROCS`不了解，可以看看 `Goroutine `相对应的 `GMP` 模型）
 3. 还有当前机器上至少存在一个正在运行的处理器 P 并且处理的运行队列为空；
 
-如果当前的 `Goroutine` 能够满足以上进入 `Spin`的条件，则会调用 [runtime_doSpin](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/runtime/proc.go#L5595:6) 进行 `Spin`。**<u>所以可以看出来，并不是一直无限自旋下去的，当自旋次数到达 4 次或者其它条件不符合的时候，就改为信号量拿锁了</u>**。
+如果当前的 `Goroutine` 能够满足以上进入 `Spin`的条件，则会调用 [runtime_doSpin](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/runtime/proc.go#L5595:6) 进行 `Spin`。**所以可以看出来，并不是一直无限自旋下去的，当自旋次数到达 4 次或者其它条件不符合的时候，就改为信号量拿锁了**。
 
-2. **<u>通过自旋等待互斥锁的释放；</u>**
+2. **通过自旋等待互斥锁的释放；**
 
 上面已经分析了，`m.lockSlow()` 会调用 [runtime_doSpin](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/runtime/proc.go#L5595:6) 进行 `Spin`进行自旋操作，其源码片段如下：
 
@@ -298,7 +298,7 @@ again:
 	RET
 ```
 
-3. **<u>计算互斥锁的最新状态；</u>**
+3. **计算互斥锁的最新状态；**
 
 如果此时 `Goroutine` 不能进行自旋操作，则会进入剩余的代码逻辑；到了这一步， state的状态可能是：
 
