@@ -1,4 +1,4 @@
-# 1.Gin 简明介绍
+# 1.Gin 概括介绍
 
 gin 是什么？官方给的解释为：Gin 是一个用 Go (Golang) 编写的 HTTP web 框架。 它是一个类似于 [martini](https://github.com/go-martini/martini) 但拥有更好性能的 API 框架, 优于 [httprouter](https://github.com/julienschmidt/httprouter)，速度提高了近 40 倍。
 
@@ -25,14 +25,14 @@ gin 有一下的一些特性：
 
 在学习 gin 之前我也用过 golang 自带的`net/http`来实现一个HTTP服务。，虽然`net/http`看着很便捷、很简单，但是它也存在很多不足：
 
-1. 不能单独的对请求方法(POST,GET等)注册特定的处理函数
-2. 不支持Path变量参数
-3. 不能很很好的获取参数
-4. 不支持参数校验
-5. 不支持参数绑定
-6. 不能更好的多种格式输出
-7. 性能一般
-8. 扩展性不足
+1. 不能单独的对请求方法(POST,GET等)注册特定的处理函数。
+2. 不支持Path变量参数。
+3. 不能很很好的获取参数。
+4. 不支持参数校验。
+5. 不支持参数绑定。
+6. 不能更好的多种格式输出。
+7. 性能一般。
+8. 扩展性不足。
 9. ……
 
 而 gin 作为这么一个那么优秀的 web 框架，弥补了`net/http`的一些不足，同时还增加了很多日常Web开发使用的功能，性能也这么好，可以让我们更好的进行Web开发，这就让人很有理由去学习这个框架了啊！
@@ -108,7 +108,7 @@ func Default() *Engine {
 }
 ```
 
-从上面的Default()，我们可以看到代码其实很短，其核心在于[New()](https://sourcegraph.com/github.com/gin-gonic/gin/-/blob/gin.go#L129:6)，让我们看看如何新创建一个引擎，代码片段如下：
+从上面的Default()，我们可以看到代码其实很短，其核心在于[New()](https://sourcegraph.com/github.com/gin-gonic/gin/-/blob/gin.go#L129:6)，让我们**看看如何新创建一个引擎**，代码片段如下：
 
 ```go
 // New 会返回一个新的空白Engine实例，不附加任何中间件。
@@ -193,16 +193,13 @@ type Engine struct {
 }
 ```
 
-
-
-`Engine`是框架的实例，它包含`muxer`、中间件和还有一些配置设置。它可以通过`New()`或者`Default()`来创建一个`Engine`实例。
+`Engine`是框架的实例，它包含`RouterGroup`、中间件和还有一些配置设置。它可以通过`New()`或者`Default()`来创建一个`Engine`实例。
 
 关于上面的几个参数，具体解释如下：
 
 1. `RouterGroup`
-
-   -  路由组
-
+-  路由组
+   
 2. `RedirectTrailingSlash`
 
    - 这个是开启自动重定向（Enables automatic redirection）的开关，如果当前路由不能匹配尾斜杆的路径情况下可以开启。
@@ -241,11 +238,6 @@ type Engine struct {
 
    - 临时对象池：用于处理 context 
 
-   
-
-----
-
-
 
 再来对于[r.Run()](https://github.com/gin-gonic/gin/blob/master/gin.go#L305:23)，这个一看就显得很明显了，是启动的方法了，**<u>具体是如何启动的呢？</u>**看看接下来的代码片段：
 
@@ -262,7 +254,7 @@ func (engine *Engine) Run(addr ...string) (err error) {
 }
 ```
 
-Run方法会将路由器连接到`http`服务器并开始监听和服务HTTP请求，主要还是使用了 `http.ListenAndServe(addr, router)` 这个方法了。这里面具体就做了两件事：
+`Run` 方法会将路由器连接到`http`服务器并开始监听和服务 `HTTP` 请求，主要还是使用了 `http.ListenAndServe(addr, router)` 这个方法了。这里面具体就做了两件事：
 
 1. 获取端口值。
 2. 使用 标准库 `http.ListenAndServe()` 启动 web 监听服务，处理HTTP请求。
@@ -293,9 +285,7 @@ func resolveAddress(addr []string) string {
 2. 如果用户给出了自己想要使用的端口，则直接使用该端口。
 3. 如果传入的切片长度不为0也不为1，则证明传入了多个端口值了，返回一个Panic。
 
-
-
-然后再看看 [http.ListenAndServe()](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/net/http/server.go?utm_source=chrome-extension#L3136:6) 这个方法，其需要传入了两个参数，第一个参数我们上面也分析了为`address` 也即端口地址，第二个参数为`engine`，这是干嘛用的？我也不知道，得看看下面的源码才能知道，不过想想，引擎是干嘛的？我对引擎的理解也就是让它去自动去获取一些参数，然后再自动进行一些处理。
+然后再看看 [http.ListenAndServe()](https://sourcegraph.com/github.com/golang/go@master/-/blob/src/net/http/server.go?utm_source=chrome-extension#L3136:6) 这个方法，其需要传入了两个参数，第一个参数我们上面也分析了为`address` 也即端口地址，第二个参数为`engine`，这是干嘛用的？我也不知道，得看看下面的源码才能知道，不过想想，引擎是干嘛的？**我对引擎的理解也就是让它去自动去获取一些参数，然后再自动进行一些处理**。
 
 这里涉及到了 go 的标准库`net.http` 包，其代码片段如下：
 
@@ -426,13 +416,9 @@ func (c *Context) Next() {
 }
 ```
 
-
-
 可以知道，主要的进行处理的代码就在这一块了。最开始的时候 `c.index` 为0值，所以会执行 `c.handlers` 里面的第一个handler，然后一个个执行下去。
 
  
-
-
 
 ---
 
