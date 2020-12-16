@@ -1,12 +1,3 @@
----
-categories: "golang" 
-tags:   
-	- go
-
-date: 2020-05-25 11:41:15
-
----
-
 # 1.Channels是什么？
 
 这里又可以搬出知乎名言了，在认识一件事物之前，先问问是什么，再回答为什么！直接来说，一个Channel 是一个通信机制，它**可以让一个Goroutine 通过它给另一个Goroutine 发送值信息**。每个Channel 都有一个特殊的类型，也就是Channels可发送数据的类型（例如：一个可以发送int类型数据的Channel 一般写为chan int）。
@@ -43,13 +34,7 @@ type hchan struct {
 }
 ```
 
-<!--more-->
-
-
-
 上面提到了CSP，这里进行一些补充：CSP 是 **Communicating Sequential Process** 的简称，中文可以叫做**通信顺序进程**，是一种并发编程模型，由 [Tony Hoare](https://en.wikipedia.org/wiki/Tony_Hoare) 于 1977 年提出。简单来说，**CSP 模型由并发执行的实体（线程或者进程）所组成，实体之间通过发送消息进行通信**，这里发送消息时使用的就是通道，或者叫 channel。CSP 模型的关键是关注 channel，而不关注发送消息的实体。Go 语言实现了 CSP 部分理论，goroutine 对应 CSP 中并发执行的实体，channel 也就对应着 CSP 中的 channel。
-
-
 
 
 
@@ -549,14 +534,12 @@ func foo(ch chan<- int) <-chan int {...}
 
 ---
 
-# 3.Channels有缓存和无缓存的区别是什么？
+# 3.Channels有缓存和无缓存的区别
 
 简单来说：
 
 - 无缓存的管道，**只要没有协程写入就读出阻塞，没有协程读出，就造成写入阻塞**；
 - 有缓存的管道，即使没人写入，也能读出若干默认值，即使没人读出，也能写入若干值；
-
-
 
 **关于无缓存或带缓存channels之间的选择**
 
@@ -571,9 +554,9 @@ func foo(ch chan<- int) <-chan int {...}
 
 
 
+---
 
-
-# 参考文章
+# 他山之石
 
 - [Go语言中文文档-Channel](http://topgoer.com/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/channel.html)
 - [深入理解 Go Channel](http://legendtkl.com/2017/07/30/understanding-golang-channel/)

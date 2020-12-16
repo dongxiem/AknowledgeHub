@@ -1,13 +1,3 @@
----
-categories: "golang" 
-tags:   
-	- go
-
-date: 2020-05-29 16:21:14
-
-
----
-
 # 1.使用无缓存Channel进行goroutine通信
 
 在前面的关于Channel的一些认识当中，我们了解基于无缓存Channels的发送和接收操作将导致两个goroutine做一次同步操作，故无缓存Channels有时候也被称为同步Channels，那么我们就可以使用无缓存的Channel进行简单的goroutine通信了，代码如下：
@@ -35,8 +25,6 @@ func main() {
     fmt.Println("收到通知！")
 }
 ```
-
-<!--more-->
 
 当然对于如何使用`stuct{}`空结构体进行同步Channels的操作我是一直耿耿于怀，将上面的代码改一改，加深一下认识：
 
@@ -501,8 +489,6 @@ func main() {
 
 # 4.使用管道（Pipeline）优雅的从Channel循环取值
 
-
-
 当通过Channel发送有限的数据时，我们可以通过`close()`函数关闭Channel来告知从该Channel接收值的goroutine停止等待。当Channel被关闭时，再继续往该Channel发送值则会引发panic，如果从该Channel里接收的值一直都是类型零值。**那如何判断一个通道是否被关闭了呢？**在前面的关于Channel的认识中我们了解到，可以使用ok-idiom 进行判断，接收操作有一个**变体形式**：它多接收一个结果，多接收的第二个结果是一个布尔值ok，ture表示成功从channels接收到值，false表示channels已经被关闭并且里面没有值可接收。
 
 在下面的代码中，第一个goroutine是一个计数器，用于生成0、1、2、……形式的整数序列，然后通过channel将该整数序列发送给第二个goroutine；第二个goroutine是一个求平方的程序，对收到的每个整数求平方，然后将平方后的结果通过第二个channel发送给第三个goroutine；第三个goroutine是一个打印程序，打印收到的每个整数。
@@ -551,7 +537,7 @@ func main() {
 - 一种是使用`ok-idiom`
 - 另外一种就是使用`for range`了，而我们通常使用的是`for range`的方式。
 
-为什么for range能够起到作用呢？因为range channel 可以直接取到 channel 中的值。当我们使用 range 来操作 channel 的时候，它**依次从channel接收数据，当channel被关闭并且没有值可接收时跳出循环**。这应该和`for range`的语法糖相关，后续了解到`for range`的语法糖的时候，再返回来解决详细的解决这个疑惑！
+为什么for range能够起到作用呢？因为range channel 可以直接取到 channel 中的值。当我们使用 range 来操作 channel 的时候，**它依次从channel接收数据，当channel被关闭并且没有值可接收时跳出循环**。这应该和`for range`的语法糖相关，后续了解到`for range`的语法糖的时候，再返回来解决详细的解决这个疑惑！
 
 
 
@@ -638,34 +624,6 @@ func main() {
 
 
 ---
-
-# 6.实现循环队列
-
-
-
-
-
-
-
-
-
-# 7.控制并发数
-
-
-
-
-
-
-
-
-
-# 8.发布订阅模型
-
-
-
-
-
-
 
 # 参考文章
 
