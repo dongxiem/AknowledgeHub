@@ -35,21 +35,19 @@ func main() {
 
 截图如下：
 
-![image-20201216232136473](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201216232136.png)
+![image-20201216232136473](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142524.png)
 
 中间红框部分，则为  `s1 := []int{1, 2, 3}` 的具体汇编代码部分了，行号什么的也都显示出来，非常方便进行定位。
 
 又或者其实也并不想看整个流程的内容，只是想查看特定内容的反汇编代码，则可以使用`go tool objdump -s main main.o`反汇编特定的函数，图示如下：
 
-![image-20201216232447602](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201216232447.png)
-
-
+![image-20201216232447602](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142522.png)
 
 ## 方法三: `go build -gcflags -S`
 
 使用`go build -gcflags -S main.go`也可以得到汇编代码，截图如下：
 
-![image-20201216232641803](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201216232641.png)
+![image-20201216232641803](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142518.png)
 
 
 
