@@ -21,9 +21,9 @@ func main() {
 
 ## 方法一: `go tool compile`
 
-我们去到该项目的目录下，使用`go tool compile -N -l -S main.go`生成汇编代码，截图如下：
+我们去到该项目的目录下，使用`go tool compile -N -l -S main.go`生成汇编代码，截图部分如下：
 
-![image-20201216231954507](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201216231954.png)
+![image-20201217143030872](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217143032.png)
 
 便可以得到该源文件的汇编代码了。
 
@@ -33,21 +33,21 @@ func main() {
 
 使用`go tool objdump main.o`反汇编出代码 ：
 
-截图如下：
+截图部分如下：
 
-![image-20201216232136473](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142524.png)
+![image-20201217143104237](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217143104.png)
 
 中间红框部分，则为  `s1 := []int{1, 2, 3}` 的具体汇编代码部分了，行号什么的也都显示出来，非常方便进行定位。
 
-又或者其实也并不想看整个流程的内容，只是想查看特定内容的反汇编代码，则可以使用`go tool objdump -s main main.o`反汇编特定的函数，图示如下：
+又或者其实也并不想看整个流程的内容，只是想查看特定内容的反汇编代码，则可以使用`go tool objdump -s main main.o`反汇编特定的函数，截图部分如下：
 
-![image-20201216232447602](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142522.png)
+![image-20201217143126150](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217143126.png)
 
 ## 方法三: `go build -gcflags -S`
 
-使用`go build -gcflags -S main.go`也可以得到汇编代码，截图如下：
+使用`go build -gcflags -S main.go`也可以得到汇编代码，截图部分如下：
 
-![image-20201216232641803](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217142518.png)
+![image-20201217143220400](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20201217143220.png)
 
 
 
