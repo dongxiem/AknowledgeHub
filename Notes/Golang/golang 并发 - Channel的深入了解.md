@@ -132,7 +132,7 @@ func main() {
     }
     ```
 
-- 这里简单回答两个关于**Channels关闭后接收发送会怎么样？**的问题
+- 这里简单回答两个关于Channels关闭后接收发送会怎么样？的问题
 
   - Q：**Channels被关闭还可以读吗？**
     - A：对一个已经被close过的Channels进行接收操作依然可以接受到之前已经成功发送的数据；如果Channels中已经没有数据的话将产生一个零值的数据。
@@ -145,7 +145,7 @@ func main() {
   - 向关闭的 channel 发送数据会 panic。
   - 从关闭的 channel 读数据不会 panic，读出 channel 中已有的数据之后再读就是 channel 类似的默认值，比如 chan int 类型的 channel 关闭之后读取到的值为 0。
 
-- 注：其实close最后会调用方法[runtime.closechan](https://github.com/golang/go/blob/e35876ec6591768edace6c6f3b12646899fd1b11/src/runtime/chan.go#L335)，有兴趣的可以了解一下源码。
+- 注：其实close最后会调用方法 [runtime.closechan](https://github.com/golang/go/blob/e35876ec6591768edace6c6f3b12646899fd1b11/src/runtime/chan.go#L335)，有兴趣的可以了解一下源码。
 
 这里给出对已经关闭了的Channels 再次进行数据发送的案例，看是否会引起Panic！
 

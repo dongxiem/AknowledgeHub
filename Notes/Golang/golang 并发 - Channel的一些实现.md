@@ -78,7 +78,7 @@ select和switch语句稍微有点相似，有case也有最后的default默认分
 
 ## 2.1 监听一个或者多个Channel
 
-关于select结合channel还是有几种情况出现的，比如我们的select可以**<u>监听一个或者多个channel</u>**，只要有一个channel做好准备进行数据发送，则select则会马上进行处理，代码如下：
+关于select结合channel还是有几种情况出现的，比如我们的select可以**监听一个或者多个channel**，只要有一个channel做好准备进行数据发送，则select则会马上进行处理，代码如下：
 
 ```go
 package main
@@ -384,7 +384,7 @@ func main() {
 
 ![image-20200823234824352](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20200823234824.png)
 
-但问题是**如果我们想要退出两个或者任意多个Goroutine怎么办呢？**这里大概有两种办法：
+**但问题是如果我们想要退出两个或者任意多个Goroutine怎么办呢？**这里大概有两种办法：
 
 <u>一种是向所有的goroutine发送同样数量的信号给对应的同步Channel来进行退出提示（上面的示例就是一个例子了！）</u>。但是这样并不是保险的，想想如果在发出发出信号的时候有些goroutine自动退出了，那么是不是<u>Channel中的事件数比需要关闭的goroutine还多</u>？这样一来，我们的发送就直接被阻塞了！除了发送到Channel的事件数目过多的情况，<u>过少的情况也可能出现</u>，比如待关闭的goroutine又生成了其他的goroutine，那样一来就会产生有些需要关闭的goroutine却没有收到退出的消息
 
@@ -394,7 +394,7 @@ func main() {
 
 而另外一种则是通过Channel进行消息广播，**使用一个专门的通道，发送退出的信号**，我们看看如何进行一步步改进。
 
-**首先我们可以通过不向Channel发送值而是使用`close`关闭一个Channel，从而实现广播的效果！**为什么不使用发送值而是使用close呢？因为当一个goroutine从一个channel中接收到一个值的时候，他会消费掉这个值，这样其它的goroutine就没法看到这条信息了。
+首先我们可以通过不向Channel发送值而是使用`close`关闭一个Channel，从而实现广播的效果！为什么不使用发送值而是使用close呢？因为当一个goroutine从一个channel中接收到一个值的时候，他会消费掉这个值，这样其它的goroutine就没法看到这条信息了。
 
 比如说，我们启动了10个worker时，只要`main()`执行关闭cancel通道，每一个worker都会都到信号，进而关闭。示例代码如下：
 
@@ -433,7 +433,7 @@ func main() {
 }
 ```
 
-这里存在的问题就是：当每个Goroutine收到退出指令退出时一般会进行一定的清理工作，但是退出的清理工作并不能保证被完成，因为**`main`线程并没有等待各个工作Goroutine退出工作完成的机制**。我们可以结合`sync.WaitGroup`来改进:
+这里存在的问题就是：当每个Goroutine收到退出指令退出时一般会进行一定的清理工作，但是退出的清理工作并不能保证被完成，因为`main`线程并没有等待各个工作Goroutine退出工作完成的机制。我们可以结合`sync.WaitGroup`来改进:
 
 ```go
 package main
@@ -479,9 +479,9 @@ func main() {
 
 小结一下处理并发协程的安全退出的几种方法：
 
-1. 使用`ok-idiom`处理一个或者多个goroutine的关闭，但是多个goroutine的关闭并不推荐使用这种方式进行。
+1. 使用`ok-idiom`处理一个或者多个`goroutine`的关闭，但是多个`goroutine`的关闭并不推荐使用这种方式进行。
 2. 通过Channel进行消息广播，**使用一个专门的Channel，通过`close()`发送退出的信号**。
-3. 在第二点的基础上结合`sync.WaitGroup`来改进，完善为**`main`线程等待各个工作Goroutine退出工作完成的机制**
+3. 在第二点的基础上结合`sync.WaitGroup`来改进，完善为`main`线程等待各个工作`Goroutine`退出工作完成的机制
 
 
 
