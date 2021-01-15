@@ -308,7 +308,7 @@ func main() {
 
 这里看到了一幅很具体的图展示了什么叫无缓存的Channel：
 
-![不带缓存的Channels](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20200822000155.png)
+![不带缓存的Channels](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20210115215800.png)
 
 
 
@@ -466,7 +466,7 @@ func main() {
 
 同样参考如下图所示：
 
-![带缓存的Channels](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20200822000228.png)
+![带缓存的Channels](https://garmen-imgsubmit.oss-cn-shenzhen.aliyuncs.com/img/20210115215808.png)
 
 
 
